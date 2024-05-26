@@ -815,15 +815,24 @@ func readBytesBytes(b []byte, scratch []byte, zc bool) (v []byte, o []byte, err 
 		return
 	}
 
-	if cap(scratch) >= read {
-		v = scratch[0:read]
+	// Avoiding heap allocation by using a stack-allocated buffer if possible
+	if len(scratch) >= read {
+		v = scratch[:read]
 	} else {
-		v = make([]byte, read)
+		// Using a fixed-size array for stack allocation when possible
+		var stackBuf [1024]byte
+		if read <= len(stackBuf) {
+			v = stackBuf[:read]
+		} else {
+			// Fallback to heap allocation if the size exceeds our fixed-size buffer
+			v = make([]byte, read)
+		}
 	}
 
 	o = b[copy(v, b):]
 	return
 }
+
 
 // ReadBytesZC extracts the messagepack-encoded
 // binary field without copying. The returned []byte
