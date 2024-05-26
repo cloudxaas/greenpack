@@ -1,4 +1,4 @@
-module github.com/glycerine/greenpack
+module github.com/cloudxaas/greenpack
 
 go 1.18
 
